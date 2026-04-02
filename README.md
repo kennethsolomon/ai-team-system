@@ -23,11 +23,11 @@ Instead of wrestling with a single assistant that forgets everything between ses
 
 <div align="center">
 <br/>
-<a href="https://htmlpreview.github.io/?https://github.com/kennethsolomon/ai-team-system/blob/main/demo/demo-video.html">
+<a href="https://kennethsolomon.github.io/ai-team-system/demo/demo-video.html">
 <img src="https://img.shields.io/badge/%E2%96%B6%20Watch_the_45--second_walkthrough-6366f1?style=for-the-badge&labelColor=0a0a0b" alt="Watch Demo" />
 </a>
 <br/><br/>
-<sub>Animated HTML demo -- <a href="https://htmlpreview.github.io/?https://github.com/kennethsolomon/ai-team-system/blob/main/demo/demo-video.html">click to watch</a> or clone and open <code>demo/demo-video.html</code> locally.</sub>
+<sub>Animated HTML demo -- <a href="https://kennethsolomon.github.io/ai-team-system/demo/demo-video.html">click to watch live</a> or clone and open <code>demo/demo-video.html</code> locally.</sub>
 <br/><br/>
 </div>
 
