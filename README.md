@@ -9,19 +9,13 @@
 [![Agents](https://img.shields.io/badge/Agents-11-8B5CF6.svg)](#what-you-get-on-day-1)
 [![GitHub Stars](https://img.shields.io/github/stars/kennethsolomon/ai-team-system?style=flat&color=F59E0B)](https://github.com/kennethsolomon/ai-team-system)
 
-</div>
-
 *Built to delegate.*
+
+</div>
 
 > Stop prompting one AI for everything. Get a team.
 
-Instead of wrestling with a single assistant that forgets everything between sessions, AI Team System gives you **11 specialists** — each with a clear role, persistent memory, and zero overlap. You talk to John (your Chief of Staff). John handles the rest.
-
----
-
-## Why this exists
-
-Single-AI setups break down fast. Context drifts, tasks bleed into each other, and nobody owns anything. You end up re-explaining your entire life every session. AI Team System fixes this with **role separation** — each agent owns one domain, remembers what it learned, and never steps on another agent's work. The result is a compounding knowledge system that gets sharper every time you use it.
+Instead of wrestling with a single assistant that forgets everything between sessions, AI Team System gives you **11 specialists** -- each with a clear role, persistent memory, and zero overlap. You talk to John (your Chief of Staff). John handles the rest.
 
 ---
 
@@ -33,9 +27,32 @@ Single-AI setups break down fast. Context drifts, tasks bleed into each other, a
 <img src="https://img.shields.io/badge/%E2%96%B6%20Watch_the_45--second_walkthrough-6366f1?style=for-the-badge&labelColor=0a0a0b" alt="Watch Demo" />
 </a>
 <br/><br/>
-<sub>Animated HTML demo — open <code>demo/demo-video.html</code> in your browser, or <a href="./demo/demo-video.html">click here</a>.<br/>Enable GitHub Pages on this repo to host the demo as a live URL.</sub>
+<sub>Animated HTML demo -- open <code>demo/demo-video.html</code> in your browser, or <a href="./demo/demo-video.html">click here</a>.<br/>Enable GitHub Pages on this repo to host the demo as a live URL.</sub>
 <br/><br/>
 </div>
+
+---
+
+## Table of contents
+
+- [Why this exists](#why-this-exists)
+- [What you get on day 1](#what-you-get-on-day-1)
+- [Quickstart](#quickstart)
+- [How it works](#how-it-works)
+- [Adding tools (optional)](#adding-tools-optional)
+- [Obsidian integration (optional)](#obsidian-integration-optional)
+- [Project layout](#project-layout)
+- [A typical session](#a-typical-session)
+- [Who this is for](#who-this-is-for)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+---
+
+## Why this exists
+
+Single-AI setups break down fast -- context drifts, tasks bleed into each other, and nobody owns anything. AI Team System fixes this with **role separation**: each agent owns one domain, remembers what it learned, and never steps on another agent's work. The result is a compounding knowledge system that gets sharper every time you use it.
 
 ---
 
@@ -47,28 +64,28 @@ These 8 agents work immediately:
 
 | | Name | What they do |
 |---|---|---|
-| 🗂 | **John** | Chief of Staff. Routes every request to the right specialist. Never does work himself. |
-| 🔍 | **Pax** | Research Analyst. Studies real experts in any domain before the team hires a new specialist. |
-| 🧑‍💼 | **Mike** | HR Director. Takes Pax's research and builds a fully-defined AI team member. |
-| 🗄 | **Vault** | Data Architect. Owns the SQLite database, ingestion pipelines, and full-text search. |
-| 🗺 | **Atlas** | Knowledge Architect. Designs your folder structure, tagging system, and naming conventions. |
-| 📚 | **Sage** | Curriculum Designer. Builds self-paced learning paths for any topic, fully resourced. |
-| 💻 | **Lux** | Full-Stack Developer. Builds the web dashboard — FastAPI + React + dark theme. |
-| 🔬 | **Vex** | Verification Specialist. Adversarially reviews every implementation before you see it. |
+| | **John** | Chief of Staff. Routes every request to the right specialist. Never does work himself. |
+| | **Pax** | Research Analyst. Studies real experts in any domain before the team hires a new specialist. |
+| | **Mike** | HR Director. Takes Pax's research and builds a fully-defined AI team member. |
+| | **Vault** | Data Architect. Owns the SQLite database, ingestion pipelines, and full-text search. |
+| | **Atlas** | Knowledge Architect. Designs your folder structure, tagging system, and naming conventions. |
+| | **Sage** | Curriculum Designer. Builds self-paced learning paths for any topic, fully resourced. |
+| | **Lux** | Full-Stack Developer. Builds the web dashboard -- FastAPI + React + dark theme. |
+| | **Vex** | Verification Specialist. Adversarially reviews every implementation before you see it. |
 
 These 3 agents get better when you connect external tools (but work in limited mode without them):
 
 | | Name | What they do | What they need |
 |---|---|---|---|
-| ✅ | **Koda** | Productivity Manager. Captures tasks, runs daily briefings, keeps your list honest. | A task manager (Gawin, Todoist, etc.) — or just manages local markdown files |
-| 🌿 | **Sol** | Wellness Coach. Reads your journal and surfaces mood, sleep, and energy patterns. | A journal app — or reads local `.md` diary files directly |
-| ☀️ | **Kai** | Morning Briefing. Synthesizes calendar, tasks, finances, and news into a daily digest. | Calendar / finance MCPs for the full experience; works without them using local files + web news |
+| | **Koda** | Productivity Manager. Captures tasks, runs daily briefings, keeps your list honest. | A task manager (Gawin, Todoist, etc.) -- or just manages local markdown files |
+| | **Sol** | Wellness Coach. Reads your journal and surfaces mood, sleep, and energy patterns. | A journal app -- or reads local `.md` diary files directly |
+| | **Kai** | Morning Briefing. Synthesizes calendar, tasks, finances, and news into a daily digest. | Calendar / finance MCPs for the full experience; works without them using local files + web news |
 
 ---
 
 ## Quickstart
 
-**Prerequisites:** [Claude Code](https://claude.ai/code) (CLI or desktop) · Python 3.11+
+**Prerequisites:** [Claude Code](https://claude.ai/code) (CLI or desktop) and Python 3.11+
 
 ```bash
 git clone https://github.com/kennethsolomon/ai-team-system my-ai-team
@@ -91,14 +108,14 @@ John walks you through the rest in about 5 minutes.
 **You only ever talk to John.**
 
 ```
-You → John → the right specialist → Owner's Inbox/
+You -> John -> the right specialist -> Owner's Inbox/
 ```
 
 Drop a file in `Team Inbox/`, ask a question, or give a task. John figures out who should handle it, hands it off, and delivers the result. You never run scripts or manage agents manually.
 
 **The team remembers.**
 
-Every session, agents load memories from the previous one — preferences, lessons learned, past decisions. The knowledge compounds over time.
+Every session, agents load memories from the previous one -- preferences, lessons learned, past decisions. The knowledge compounds over time.
 
 **The team grows.**
 
@@ -123,7 +140,7 @@ The core system works with zero external integrations. When you're ready, you ca
 | A journal app (Forever Diary, etc.) | Sol and Kai pull from your actual diary |
 | A finance tracker | Kai adds a financial pulse to the daily briefing |
 
-To add an MCP: install it in Claude Code, then tell John — he'll update the relevant agent's configuration.
+To add an MCP: install it in Claude Code, then tell John -- he'll update the relevant agent's configuration.
 
 ---
 
@@ -146,7 +163,7 @@ Then run the ingestion pipeline:
 python3 db/pipeline/ingest_obsidian.py
 ```
 
-This indexes your entire vault into `brain.db` with full-text search. Safe to re-run — only processes changed files.
+This indexes your entire vault into `brain.db` with full-text search. Safe to re-run -- only processes changed files.
 
 ---
 
@@ -158,9 +175,10 @@ README.md
 
 .claude/
 ├── agents/                  <- 11 agent definitions (the executable configs)
+├── settings.json
 └── skills/
     ├── setup/               <- /setup onboarding flow
-    ├── hire-specialist/     <- /hire-specialist pipeline (Pax → Mike)
+    ├── hire-specialist/     <- /hire-specialist pipeline (Pax -> Mike)
     └── obsidian-markdown.md <- Obsidian syntax reference for all agents
 
 Team/
@@ -183,14 +201,23 @@ Areas/
 └── Finance/                 <- Financial snapshots
 
 Owner's Inbox/               <- Finished deliverables land here
+├── Hiring/
+├── Reports/
+├── Research/
+├── Summaries/
+└── Verification/
+
 Team Inbox/                  <- Drop files here for the team to process
 
 config/
-├── config.example.json      <- Copy → config.json, add your vault paths
-└── .env.example             <- Copy → .env, add API keys if needed
+├── config.example.json      <- Copy -> config.json, add your vault paths
+└── .env.example             <- Copy -> .env, add API keys if needed
 
 demo/
 └── demo-video.html          <- Animated product walkthrough
+
+assets/
+└── logo.svg
 ```
 
 ---
@@ -198,10 +225,10 @@ demo/
 ## A typical session
 
 1. Open the project in Claude Code
-2. John starts up automatically — checks the inbox, loads memory from last session
+2. John starts up automatically -- checks the inbox, loads memory from last session
 3. Tell John what you need
-4. John delegates — result appears in `Owner's Inbox/`
-5. Say "bye" — John saves a session summary for tomorrow
+4. John delegates -- result appears in `Owner's Inbox/`
+5. Say "bye" -- John saves a session summary for tomorrow
 
 ---
 
@@ -219,14 +246,7 @@ You'll get the most out of this if you:
 
 ## Contributing
 
-This project is open to contributions. Here's how to get involved:
-
-- **Fork the repo** and create your branch from `main`
-- **Add a new agent** — follow the pattern in `.claude/agents/` and `Team/` to define a specialist for a domain not yet covered
-- **Improve existing agents** — sharpen prompts, add skills, fix edge cases
-- **Submit a PR** with a clear description of what changed and why
-
-Have ideas or feedback? Start a thread in [GitHub Discussions](https://github.com/kennethsolomon/ai-team-system/discussions).
+Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 If this project helped you build something useful, a star on the repo goes a long way.
 
@@ -234,7 +254,7 @@ If this project helped you build something useful, a star on the repo goes a lon
 
 ## License
 
-MIT — use it, fork it, build on it.
+[MIT](LICENSE) -- use it, fork it, build on it.
 
 ---
 
