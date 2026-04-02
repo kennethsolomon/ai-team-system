@@ -1,0 +1,8 @@
+{
+  "owner_name": "Your Name",
+  "vault_paths": {
+    "MyVault": "/path/to/your/obsidian/vault"
+  },
+  "db_path": "db/brain.db",
+  "areas_path": "Areas"
+}

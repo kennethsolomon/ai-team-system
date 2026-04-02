@@ -1,0 +1,10 @@
+db/brain.db
+db/brain.db-wal
+db/brain.db-shm
+__pycache__/
+*.pyc
+*.pyo
+.env
+config/config.json
+.DS_Store
+node_modules/

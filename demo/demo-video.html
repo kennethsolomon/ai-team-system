@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Team System — Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0a0b;
+    --surface:   #141416;
+    --surface2:  #1c1c1f;
+    --accent:    #6366f1;
+    --accent2:   #818cf8;
+    --text:      #fafafa;
+    --muted:     #a1a1aa;
+    --dim:       #52525b;
+    --border:    #27272a;
+    --green:     #34d399;
+    --amber:     #fbbf24;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  }
+
+  #stage {
+    width: 1280px; height: 720px;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* Center stage on screen */
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* ─── SHARED UTILITIES ─────────────────────────────────────── */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .scene.active { pointer-events: auto; }
+
+  /* ─── NOISE GRAIN OVERLAY ──────────────────────────────────── */
+  #grain {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* Progress bar */
+  #progress-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--accent);
+    width: 0%;
+    z-index: 90;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* ─── SCENE 1 — HOOK ───────────────────────────────────────── */
+  #scene-hook {
+    gap: 0;
+  }
+
+  .hook-line {
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: -0.5px;
+    opacity: 0;
+    transform: translateY(20px);
+    text-align: center;
+  }
+
+  .hook-line.highlight {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -2px;
+    margin-top: 16px;
+  }
+
+  .hook-line .accent { color: var(--accent2); }
+
+  /* ─── SCENE 2 — DELEGATION ─────────────────────────────────── */
+  #scene-delegation {
+    gap: 24px;
+    align-items: flex-start;
+    padding: 0 120px;
+  }
+
+  .scene-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0;
+    margin-bottom: 8px;
+  }
+
+  .terminal-window {
+    width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .terminal-bar {
+    background: var(--surface2);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.red   { background: #ef4444; }
+  .dot.yellow{ background: #f59e0b; }
+  .dot.green { background: #10b981; }
+
+  .terminal-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .terminal-body {
+    padding: 20px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+  }
+
+  .terminal-prompt {
+    color: var(--accent2);
+  }
+
+  .terminal-user { color: var(--green); }
+  .terminal-text { color: var(--text); }
+  .terminal-cursor {
+    display: inline-block;
+    width: 8px; height: 16px;
+    background: var(--accent2);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .routing-arrow {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    position: relative;
+    opacity: 0;
+  }
+
+  .routing-arrow::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: -4px;
+    border: 5px solid transparent;
+    border-left-color: var(--accent);
+  }
+
+  .agent-card-inline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  .agent-card-inline.john-card { border-color: var(--accent); }
+
+  .agent-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .agent-info-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .agent-info-role {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .route-badge {
+    margin-left: auto;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: var(--accent2);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+  }
+
+  .delegation-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ─── SCENE 3 — TEAM GRID ──────────────────────────────────── */
+  #scene-team {
+    gap: 32px;
+  }
+
+  .team-headline {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: -0.3px;
+    opacity: 0;
+  }
+
+  .team-headline span { color: var(--text); font-weight: 700; }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    width: 960px;
+  }
+
+  .team-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: border-color 0.2s;
+  }
+
+  .team-card:hover { border-color: var(--accent); }
+
+  .team-card-avatar {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 10px;
+  }
+
+  .team-card-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .team-card-role {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--accent2);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .team-card-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── SCENE 4 — MEMORY ─────────────────────────────────────── */
+  #scene-memory {
+    gap: 32px;
+    align-items: center;
+  }
+
+  .memory-headline {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -1px;
+    opacity: 0;
+    text-align: center;
+  }
+
+  .memory-sub {
+    font-size: 16px;
+    color: var(--muted);
+    opacity: 0;
+    text-align: center;
+    margin-top: -16px;
+  }
+
+  .memory-canvas-wrap {
+    position: relative;
+    width: 700px;
+    height: 220px;
+    opacity: 0;
+  }
+
+  .memory-node {
+    position: absolute;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .memory-node.active {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(99,102,241,0.1);
+  }
+
+  .memory-node.new-node {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(52,211,153,0.08);
+  }
+
+  .session-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    width: 640px;
+    opacity: 0;
+  }
+
+  .session-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .session-text {
+    font-size: 12px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--muted);
+  }
+
+  .session-text .hl { color: var(--accent2); }
+  .session-text .ok { color: var(--green); }
+
+  /* ─── SCENE 5 — INBOX ──────────────────────────────────────── */
+  #scene-inbox {
+    gap: 24px;
+  }
+
+  .inbox-headline {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.8px;
+    opacity: 0;
+  }
+
+  .inbox-layout {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    width: 900px;
+  }
+
+  .inbox-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .inbox-header {
+    background: var(--surface2);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .inbox-icon {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .inbox-icon.in  { background: rgba(251,191,36,0.2); color: var(--amber); }
+  .inbox-icon.out { background: rgba(52,211,153,0.2); color: var(--green); }
+
+  .inbox-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .inbox-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; }
+
+  .inbox-file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .file-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .file-icon.pdf  { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .file-icon.img  { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .file-icon.md   { background: rgba(99,102,241,0.15); color: var(--accent2); }
+  .file-icon.done { background: rgba(52,211,153,0.15); color: var(--green); }
+
+  .file-name { font-size: 12px; color: var(--text); font-weight: 500; }
+  .file-meta { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  .processing-band {
+    flex: 0 0 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+  }
+
+  .proc-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .proc-chain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .proc-chip {
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.25);
+    color: var(--accent2);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 99px;
+    opacity: 0;
+  }
+
+  .proc-arrow-down {
+    width: 1px;
+    height: 10px;
+    background: var(--border);
+    opacity: 0.5;
+  }
+
+  /* ─── SCENE 6 — HIRE ───────────────────────────────────────── */
+  #scene-hire {
+    gap: 32px;
+  }
+
+  .hire-headline {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.8px;
+    opacity: 0;
+    text-align: center;
+  }
+
+  .hire-headline .q { color: var(--muted); font-weight: 300; font-size: 24px; }
+
+  .hire-pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    opacity: 0;
+  }
+
+  .hire-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  .hire-step-avatar {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+  }
+
+  .hire-step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .hire-step-sub {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 100px;
+  }
+
+  .hire-arrow {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    position: relative;
+    margin: 0 4px;
+    margin-bottom: 32px;
+    opacity: 0;
+  }
+
+  .hire-arrow::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: -4px;
+    border: 5px solid transparent;
+    border-left-color: var(--accent2);
+  }
+
+  .new-card-appear {
+    background: var(--surface);
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+    box-shadow: 0 0 32px rgba(52,211,153,0.12);
+  }
+
+  .new-card-avatar {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #059669, #34d399);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+  }
+
+  .new-card-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .new-card-role { font-size: 12px; color: var(--green); margin-top: 2px; }
+
+  .new-badge {
+    margin-left: auto;
+    background: rgba(52,211,153,0.15);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 99px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ─── SCENE 7 — CTA ────────────────────────────────────────── */
+  #scene-cta {
+    gap: 0;
+  }
+
+  .cta-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0;
+    margin-bottom: 20px;
+  }
+
+  .cta-title {
+    font-size: 72px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -3px;
+    opacity: 0;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .cta-title .word-ai { color: var(--accent2); }
+
+  .cta-tagline {
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--muted);
+    margin-top: 20px;
+    opacity: 0;
+    text-align: center;
+    max-width: 560px;
+    line-height: 1.5;
+  }
+
+  .cta-url {
+    margin-top: 32px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    color: var(--dim);
+    opacity: 0;
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: var(--surface);
+    letter-spacing: 0.5px;
+  }
+
+  .cta-url .url-accent { color: var(--accent2); }
+
+  /* scan line */
+  .scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.15), transparent);
+    pointer-events: none;
+    z-index: 50;
+    top: 0;
+  }
+
+  /* ─── REPLAY BUTTON ────────────────────────────────────────── */
+  #replay-btn {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 200;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  #replay-btn:hover { border-color: var(--accent); color: var(--accent2); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="grain"></div>
+  <div class="scanline" id="scanline"></div>
+  <div id="progress-bar"></div>
+
+  <!-- SCENE 1: HOOK -->
+  <div class="scene" id="scene-hook">
+    <div class="hook-line" id="hook-l1">You've been prompting one AI for everything.</div>
+    <div class="hook-line highlight" id="hook-l2">What if you had a <span class="accent">team?</span></div>
+  </div>
+
+  <!-- SCENE 2: DELEGATION -->
+  <div class="scene" id="scene-delegation">
+    <div class="scene-label" id="del-label">How it works</div>
+    <div class="delegation-flow">
+      <div class="flow-row">
+        <div class="terminal-window" id="terminal">
+          <div class="terminal-bar">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+            <div class="terminal-label">claude — ai-team-system</div>
+          </div>
+          <div class="terminal-body">
+            <span class="terminal-user">kenneth</span>
+            <span class="terminal-prompt"> ~ </span>
+            <span class="terminal-text" id="typed-text"></span>
+            <span class="terminal-cursor" id="cursor"></span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-row" id="john-row" style="gap:12px">
+        <div class="agent-card-inline john-card" id="john-card">
+          <div class="agent-avatar" style="background: linear-gradient(135deg,#6366f1,#818cf8)">J</div>
+          <div>
+            <div class="agent-info-name">John</div>
+            <div class="agent-info-role">Chief of Staff — routes every task</div>
+          </div>
+          <div class="route-badge" id="route-badge">→ Atlas</div>
+        </div>
+      </div>
+      <div class="flow-row" id="atlas-row">
+        <div class="agent-card-inline" id="atlas-card">
+          <div class="agent-avatar" style="background: linear-gradient(135deg,#f59e0b,#fbbf24)">A</div>
+          <div>
+            <div class="agent-info-name">Atlas</div>
+            <div class="agent-info-role">Knowledge Architect — organizing your notes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 3: TEAM GRID -->
+  <div class="scene" id="scene-team">
+    <div class="team-headline" id="team-headline">Meet your <span>10 specialists</span></div>
+    <div class="team-grid" id="team-grid">
+      <!-- Cards injected by JS -->
+    </div>
+  </div>
+
+  <!-- SCENE 4: MEMORY -->
+  <div class="scene" id="scene-memory">
+    <div class="memory-headline" id="mem-headline">The team learns.</div>
+    <div class="memory-sub" id="mem-sub">Memories persist across every session.</div>
+    <div class="memory-canvas-wrap" id="mem-canvas">
+      <div class="memory-node" id="mn1" style="top:20px; left:40px">prefers visual explanations</div>
+      <div class="memory-node active" id="mn2" style="top:20px; left:240px">dislikes verbose output</div>
+      <div class="memory-node" id="mn3" style="top:20px; left:490px">scoliosis — adapt fitness plans</div>
+      <div class="memory-node active" id="mn4" style="top:90px; left:120px">weekly finance reviews on Mondays</div>
+      <div class="memory-node" id="mn5" style="top:90px; left:380px">Laravel + TypeScript stack</div>
+      <div class="memory-node new-node" id="mn6" style="top:160px; left:240px">+ new lesson stored</div>
+    </div>
+    <div class="session-bar" id="session-bar">
+      <div class="session-dot"></div>
+      <div class="session-text">
+        <span class="hl">load_context_for_session</span>(<span class="hl">'atlas'</span>) →
+        <span class="ok">6 memories</span>, <span class="ok">3 lessons</span> loaded
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 5: INBOX -->
+  <div class="scene" id="scene-inbox">
+    <div class="inbox-headline" id="inbox-hl">Drop files in. Get results out.</div>
+    <div class="inbox-layout">
+      <div class="inbox-box" id="inbox-in">
+        <div class="inbox-header">
+          <div class="inbox-icon in">↓</div>
+          <div class="inbox-title">Team Inbox/</div>
+        </div>
+        <div class="inbox-body">
+          <div class="inbox-file" id="ifile1">
+            <div class="file-icon pdf">P</div>
+            <div>
+              <div class="file-name">gym-xrays.pdf</div>
+              <div class="file-meta">dropped by Kenneth</div>
+            </div>
+          </div>
+          <div class="inbox-file" id="ifile2">
+            <div class="file-icon img">I</div>
+            <div>
+              <div class="file-name">workout-screenshot.png</div>
+              <div class="file-meta">dropped by Kenneth</div>
+            </div>
+          </div>
+          <div class="inbox-file" id="ifile3">
+            <div class="file-icon md">M</div>
+            <div>
+              <div class="file-name">march-expenses.md</div>
+              <div class="file-meta">dropped by Kenneth</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="processing-band" id="proc-band">
+        <div class="proc-label">Processing</div>
+        <div class="proc-chain">
+          <div class="proc-chip" id="pc1">Rex</div>
+          <div class="proc-arrow-down"></div>
+          <div class="proc-chip" id="pc2">Finn</div>
+          <div class="proc-arrow-down"></div>
+          <div class="proc-chip" id="pc3">Vault</div>
+        </div>
+      </div>
+
+      <div class="inbox-box" id="inbox-out">
+        <div class="inbox-header">
+          <div class="inbox-icon out">↑</div>
+          <div class="inbox-title">Owner's Inbox/</div>
+        </div>
+        <div class="inbox-body">
+          <div class="inbox-file" id="ofile1">
+            <div class="file-icon done">✓</div>
+            <div>
+              <div class="file-name">fitness-report.md</div>
+              <div class="file-meta">Rex · ready to review</div>
+            </div>
+          </div>
+          <div class="inbox-file" id="ofile2">
+            <div class="file-icon done">✓</div>
+            <div>
+              <div class="file-name">expense-reconciliation.md</div>
+              <div class="file-meta">Finn · ready to review</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 6: HIRE -->
+  <div class="scene" id="scene-hire">
+    <div class="hire-headline" id="hire-hl">
+      <span class="q">Need a finance advisor?</span><br/>One command. Done.
+    </div>
+    <div class="hire-pipeline" id="hire-pipe">
+      <div class="hire-step" id="hs1">
+        <div class="hire-step-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">P</div>
+        <div class="hire-step-label">Pax</div>
+        <div class="hire-step-sub">Researches the domain</div>
+      </div>
+      <div class="hire-arrow" id="ha1"></div>
+      <div class="hire-step" id="hs2">
+        <div class="hire-step-avatar" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">M</div>
+        <div class="hire-step-label">Mike</div>
+        <div class="hire-step-sub">Writes the persona + agent def</div>
+      </div>
+      <div class="hire-arrow" id="ha2"></div>
+      <div class="hire-step" id="hs3">
+        <div class="hire-step-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)">J</div>
+        <div class="hire-step-label">John</div>
+        <div class="hire-step-sub">Routes to new hire instantly</div>
+      </div>
+    </div>
+    <div class="new-card-appear" id="new-hire-card">
+      <div class="new-card-avatar">F</div>
+      <div>
+        <div class="new-card-name">Finn</div>
+        <div class="new-card-role">Finance Analyst — hired & active</div>
+      </div>
+      <div class="new-badge">New</div>
+    </div>
+  </div>
+
+  <!-- SCENE 7: CTA -->
+  <div class="scene" id="scene-cta">
+    <div class="cta-eyebrow" id="cta-eyebrow">Open Source Template</div>
+    <div class="cta-title" id="cta-title">
+      <span class="word-ai">AI</span> Team<br/>System
+    </div>
+    <div class="cta-tagline" id="cta-tagline">
+      A personal AI team that delegates, learns, and grows with you.
+    </div>
+    <div class="cta-url" id="cta-url">
+      <span class="url-accent">github.com</span>/your-handle/ai-team-system
+    </div>
+  </div>
+
+  <button id="replay-btn">Replay</button>
+</div>
+
+<script>
+const gsap = window.gsap;
+
+// ─── TEAM DATA ────────────────────────────────────────────────
+const TEAM = [
+  { init:'J', name:'John',  role:'Chief of Staff',     desc:'Routes every task — never executes himself',  grad:'#6366f1,#818cf8' },
+  { init:'P', name:'Pax',   role:'Research Analyst',   desc:'Profiles any domain before hiring',            grad:'#8b5cf6,#a78bfa' },
+  { init:'M', name:'Mike',  role:'HR Director',        desc:'Creates and onboards new AI team members',     grad:'#0ea5e9,#38bdf8' },
+  { init:'V', name:'Vault', role:'Data Architect',     desc:'Owns the SQLite knowledge database',           grad:'#f43f5e,#fb7185' },
+  { init:'A', name:'Atlas', role:'Knowledge Architect',desc:'Folder structure, tagging, organization',      grad:'#f59e0b,#fbbf24' },
+  { init:'S', name:'Sage',  role:'Curriculum Designer',desc:'Learning paths and study plans',               grad:'#10b981,#34d399' },
+  { init:'K', name:'Koda',  role:'Productivity Mgr',   desc:'Tasks, GTD, Gawin integration',               grad:'#06b6d4,#22d3ee' },
+  { init:'So',name:'Sol',   role:'Wellness Coach',     desc:'Journal reflection and mood patterns',         grad:'#f97316,#fb923c' },
+  { init:'Ka',name:'Kai',   role:'Morning Briefing',   desc:'Daily HTML digest to start your day',          grad:'#ec4899,#f472b6' },
+  { init:'L', name:'Lux',   role:'Full-Stack Dev',     desc:'Builds and maintains the web dashboard',       grad:'#6366f1,#a78bfa' },
+];
+
+// Build team grid
+const grid = document.getElementById('team-grid');
+TEAM.forEach(t => {
+  const card = document.createElement('div');
+  card.className = 'team-card';
+  card.innerHTML = `
+    <div class="team-card-avatar" style="background:linear-gradient(135deg,${t.grad})">${t.init}</div>
+    <div class="team-card-name">${t.name}</div>
+    <div class="team-card-role">${t.role}</div>
+    <div class="team-card-desc">${t.desc}</div>
+  `;
+  grid.appendChild(card);
+});
+
+// ─── SCANLINE ANIMATION ────────────────────────────────────────
+gsap.to('#scanline', {
+  y: 720,
+  duration: 8,
+  ease: 'none',
+  repeat: -1,
+  yoyo: false,
+});
+
+// ─── TYPING HELPER ────────────────────────────────────────────
+function typeText(el, text, duration) {
+  const chars = text.split('');
+  let i = 0;
+  const interval = (duration * 1000) / chars.length;
+  return new Promise(resolve => {
+    const t = setInterval(() => {
+      el.textContent += chars[i++];
+      if (i >= chars.length) { clearInterval(t); resolve(); }
+    }, interval);
+  });
+}
+
+// ─── MAIN TIMELINE ────────────────────────────────────────────
+function buildTimeline() {
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  const pb = document.getElementById('progress-bar');
+  const TOTAL = 82; // seconds
+
+  // Utility: show/hide scene at a specific absolute timeline position
+  function showScene(id, pos) {
+    tl.set(`#${id}`, { opacity: 1 }, pos);
+  }
+  function hideScene(id, pos) {
+    tl.to(`#${id}`, { opacity: 0, duration: 0.6, ease: 'power2.in' }, pos);
+  }
+
+  // progress bar driver
+  tl.to(pb, { width: '100%', duration: TOTAL, ease: 'none' }, 0);
+
+  // ── SCENE 1 — HOOK (0–7s) ──────────────────────────────────
+  showScene('scene-hook', 0);
+  tl.to('#hook-l1', { opacity: 1, y: 0, duration: 0.8 }, 0.3);
+  tl.to('#hook-l2', { opacity: 1, y: 0, duration: 0.9 }, 1.6);
+  hideScene('scene-hook', 5.5);
+
+  // ── SCENE 2 — DELEGATION (7–22s) ─────────────────────────
+  showScene('scene-delegation', 6.5);
+  tl.to('#del-label', { opacity: 1, duration: 0.5 }, 7);
+  tl.to('#terminal', { opacity: 1, y: 0, duration: 0.6 }, 7.4);
+
+  // typing happens via addCallback
+  tl.add(() => {
+    const el = document.getElementById('typed-text');
+    el.textContent = '';
+    typeText(el, '"I need to organize my notes"', 2.0);
+  }, 8.2);
+
+  // hide cursor after typing
+  tl.to('#cursor', { opacity: 0, duration: 0.2 }, 10.4);
+
+  // John card appears
+  tl.to('#john-card', { opacity: 1, x: 0, duration: 0.6 }, 10.7);
+  tl.to('#route-badge', { opacity: 1, duration: 0.4 }, 11.5);
+
+  // Atlas card appears
+  tl.to('#atlas-card', { opacity: 1, x: 0, duration: 0.6 }, 12.4);
+
+  hideScene('scene-delegation', 19.4);
+
+  // ── SCENE 3 — TEAM GRID (20–38s) ─────────────────────────
+  showScene('scene-team', 20);
+  tl.to('#team-headline', { opacity: 1, duration: 0.6 }, 20.3);
+
+  const cards = document.querySelectorAll('.team-card');
+  tl.to(cards, {
+    opacity: 1, y: 0, scale: 1,
+    duration: 0.5,
+    stagger: { amount: 1.8, from: 'start', ease: 'power2.out' },
+  }, 21.2);
+
+  hideScene('scene-team', 36.4);
+
+  // ── SCENE 4 — MEMORY (37–52s) ─────────────────────────────
+  showScene('scene-memory', 37);
+  tl.to('#mem-headline', { opacity: 1, duration: 0.7 }, 37.4);
+  tl.to('#mem-sub', { opacity: 1, duration: 0.6 }, 38.2);
+  tl.to('#mem-canvas', { opacity: 1, duration: 0.5 }, 38.8);
+
+  // nodes stagger in
+  const nodes = ['#mn1','#mn2','#mn3','#mn4','#mn5'];
+  nodes.forEach((n, i) => {
+    tl.to(n, { opacity: 1, scale: 1, duration: 0.4 }, 39.2 + i * 0.28);
+  });
+
+  // new node pulses in
+  tl.to('#mn6', { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }, 41.2);
+  tl.to('#session-bar', { opacity: 1, duration: 0.6 }, 42);
+
+  hideScene('scene-memory', 50.4);
+
+  // ── SCENE 5 — INBOX (51–65s) ─────────────────────────────
+  showScene('scene-inbox', 51);
+  tl.to('#inbox-hl', { opacity: 1, duration: 0.6 }, 51.4);
+  tl.to('#inbox-in', { opacity: 1, y: 0, duration: 0.6 }, 52);
+  tl.to('#inbox-out', { opacity: 1, y: 0, duration: 0.6 }, 52.2);
+
+  // files drop into inbox
+  tl.to(['#ifile1','#ifile2','#ifile3'], { opacity: 1, y: 0, duration: 0.35, stagger: 0.2 }, 52.8);
+
+  // processing band
+  tl.to('#proc-band', { opacity: 1, duration: 0.4 }, 53.8);
+  tl.to(['#pc1','#pc2','#pc3'], { opacity: 1, duration: 0.3, stagger: 0.25 }, 54.2);
+
+  // results appear
+  tl.to(['#ofile1','#ofile2'], { opacity: 1, y: 0, duration: 0.4, stagger: 0.3 }, 55.5);
+
+  hideScene('scene-inbox', 63.4);
+
+  // ── SCENE 6 — HIRE (64–76s) ──────────────────────────────
+  showScene('scene-hire', 64);
+  tl.to('#hire-hl', { opacity: 1, duration: 0.7 }, 64.4);
+  tl.to('#hire-pipe', { opacity: 1, duration: 0 }, 65.4);
+  tl.to('#hs1', { opacity: 1, y: 0, duration: 0.5 }, 65.5);
+  tl.to('#ha1', { opacity: 1, duration: 0.4 }, 66.1);
+  tl.to('#hs2', { opacity: 1, y: 0, duration: 0.5 }, 66.3);
+  tl.to('#ha2', { opacity: 1, duration: 0.4 }, 66.9);
+  tl.to('#hs3', { opacity: 1, y: 0, duration: 0.5 }, 67.1);
+
+  // New hire card slides in
+  tl.to('#new-hire-card', { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'back.out(1.4)' }, 68.4);
+
+  hideScene('scene-hire', 74.4);
+
+  // ── SCENE 7 — CTA (75–82s) ───────────────────────────────
+  showScene('scene-cta', 75);
+  tl.to('#cta-eyebrow', { opacity: 1, duration: 0.5 }, 75.4);
+  tl.to('#cta-title', { opacity: 1, duration: 0.8, ease: 'power4.out' }, 76);
+  tl.to('#cta-tagline', { opacity: 1, duration: 0.7 }, 77.2);
+  tl.to('#cta-url', { opacity: 1, duration: 0.6 }, 78.2);
+
+  // Replay button
+  tl.to('#replay-btn', { opacity: 1, duration: 0.4 }, 79);
+
+  return tl;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+let masterTL = buildTimeline();
+
+document.getElementById('replay-btn').addEventListener('click', () => {
+  // Reset all elements
+  gsap.set('#replay-btn', { opacity: 0 });
+
+  // Reset typed text
+  document.getElementById('typed-text').textContent = '';
+  document.getElementById('cursor').style.opacity = '1';
+
+  // Kill and rebuild
+  masterTL.kill();
+  masterTL = buildTimeline();
+});
+</script>
+</body>
+</html>
