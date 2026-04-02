@@ -27,7 +27,15 @@ Single-AI setups break down fast. Context drifts, tasks bleed into each other, a
 
 ## See it in action
 
-Open `demo/demo-video.html` in your browser for an 82-second animated walkthrough.
+<div align="center">
+<br/>
+<a href="./demo/demo-video.html">
+<img src="https://img.shields.io/badge/%E2%96%B6%20Watch_the_45--second_walkthrough-6366f1?style=for-the-badge&labelColor=0a0a0b" alt="Watch Demo" />
+</a>
+<br/><br/>
+<sub>Animated HTML demo — open <code>demo/demo-video.html</code> in your browser, or <a href="./demo/demo-video.html">click here</a>.<br/>Enable GitHub Pages on this repo to host the demo as a live URL.</sub>
+<br/><br/>
+</div>
 
 ---
 

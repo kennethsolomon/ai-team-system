@@ -947,6 +947,9 @@
 <script>
 const gsap = window.gsap;
 
+// ─── SPEED MULTIPLIER ─────────────────────────────────────────
+gsap.globalTimeline.timeScale(1.8);
+
 // ─── TEAM DATA ────────────────────────────────────────────────
 const TEAM = [
   { init:'J', name:'John',  role:'Chief of Staff',     desc:'Routes every task — never executes himself',  grad:'#6366f1,#818cf8' },
@@ -988,7 +991,9 @@ gsap.to('#scanline', {
 function typeText(el, text, duration) {
   const chars = text.split('');
   let i = 0;
-  const interval = (duration * 1000) / chars.length;
+  // Match GSAP globalTimeline speed so typing stays in sync
+  const speed = gsap.globalTimeline.timeScale();
+  const interval = (duration * 1000) / chars.length / speed;
   return new Promise(resolve => {
     const t = setInterval(() => {
       el.textContent += chars[i++];
