@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/logo.svg" alt="AI Team System" width="120" />
+<img src="assets/logo.png" alt="AI Team System" width="120" />
 
 # AI Team System
 
