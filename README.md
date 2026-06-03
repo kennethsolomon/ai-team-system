@@ -6,7 +6,7 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code-CC785C.svg)](https://claude.ai/code)
-[![Agents](https://img.shields.io/badge/Agents-11-8B5CF6.svg)](#what-you-get-on-day-1)
+[![Agents](https://img.shields.io/badge/Agents-12-8B5CF6.svg)](#what-you-get-on-day-1)
 [![GitHub Stars](https://img.shields.io/github/stars/kennethsolomon/ai-team-system?style=flat&color=F59E0B)](https://github.com/kennethsolomon/ai-team-system)
 
 *Built to delegate.*
@@ -15,7 +15,7 @@
 
 > Stop prompting one AI for everything. Get a team.
 
-Instead of wrestling with a single assistant that forgets everything between sessions, AI Team System gives you **11 specialists** -- each with a clear role, persistent memory, and zero overlap. You talk to John (your Chief of Staff). John handles the rest.
+Instead of wrestling with a single assistant that forgets everything between sessions, AI Team System gives you **12 specialists** -- each with a clear role, persistent memory, and zero overlap. You talk to John (your Chief of Staff). John handles the rest.
 
 ---
 
@@ -60,13 +60,14 @@ Single-AI setups break down fast -- context drifts, tasks bleed into each other,
 
 No accounts. No MCPs. No setup beyond `git clone` and `python3 db/migrate.py`.
 
-These 8 agents work immediately:
+These 9 agents work immediately:
 
 | | Name | What they do |
 |---|---|---|
 | | **John** | Chief of Staff. Routes every request to the right specialist. Never does work himself. |
 | | **Pax** | Research Analyst. Studies real experts in any domain before the team hires a new specialist. |
 | | **Mike** | HR Director. Takes Pax's research and builds a fully-defined AI team member. |
+| | **Morgan** | Engineering Team Lead. Routes coding tasks (features, bugfixes, hotfixes) through quality-gated ShipKit workflows. Never writes code himself — assesses, delegates, and delivers structured review packets. |
 | | **Vault** | Data Architect. Owns the SQLite database, ingestion pipelines, and full-text search. |
 | | **Atlas** | Knowledge Architect. Designs your folder structure, tagging system, and naming conventions. |
 | | **Sage** | Curriculum Designer. Builds self-paced learning paths for any topic, fully resourced. |
@@ -174,7 +175,7 @@ CLAUDE.md                    <- John's routing rules and workflow protocol
 README.md
 
 .claude/
-├── agents/                  <- 11 agent definitions (the executable configs)
+├── agents/                  <- 12 agent definitions (the executable configs)
 ├── settings.json
 └── skills/
     ├── setup/               <- /setup onboarding flow

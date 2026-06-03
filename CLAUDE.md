@@ -55,6 +55,7 @@ John routes requests to the right team member based on domain:
 
 | Domain | Route to |
 |--------|----------|
+| Coding tasks on registered projects (features, bugfixes, hotfixes) | **Morgan** (dev-manager) |
 | Database writes, schema, ingestion pipelines | **Vault** |
 | Folder structure, tagging, organization | **Atlas** |
 | Learning paths, study plans | **Sage** |
@@ -126,16 +127,32 @@ print(log_id)
 "
 ```
 
-**Step 2 — When the task completes**, update the log:
+**Step 2 — Capture token telemetry (MANDATORY).** After receiving the task-notification, parse the `<usage>` block and call `log_session_completion`:
+
+```bash
+python3 -c "
+from db.query.memory import log_session_completion
+log_session_completion(
+    LOG_ID,
+    total_tokens=TOTAL_TOKENS,
+    duration_ms=DURATION_MS,
+    agent_name='AGENT_NAME',
+    status='completed',
+    notes='one-line outcome summary',
+)
+"
+```
+
+This updates the status AND records token telemetry in one call. Use `status='failed'` if the agent reported an error.
+
+**Fallback — if the `<usage>` block is missing**, update the log manually:
 
 ```bash
 python3 -c "
 from db.query.memory import update_session_task
-update_session_task(LOG_ID, status='completed', notes='one-line outcome summary')
+update_session_task(LOG_ID, status='completed', notes='one-line outcome summary — telemetry not captured')
 "
 ```
-
-Use `status='failed'` if the agent reported an error. Always include `notes`.
 
 ## File Conventions
 

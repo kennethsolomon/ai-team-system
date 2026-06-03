@@ -29,6 +29,12 @@ status: active
 | Kai | Morning Briefing Specialist | Multi-source data aggregation, editorial synthesis, dark-theme HTML briefing generation | [kai.md](kai.md) | [kai.md](../.claude/agents/kai.md) |
 | Lux | Full-Stack Developer | FastAPI/Flask REST APIs, React + Vite + TypeScript, Tailwind dark theme, shadcn/ui, SQLite integration | [lux.md](lux.md) | [lux.md](../.claude/agents/lux.md) |
 
+## Engineering
+
+| Name | Role | Expertise | Profile | Agent |
+|------|------|-----------|---------|-------|
+| Morgan | Engineering Team Lead | Coding task routing, ShipKit workflow delegation, project tracking, specialist hiring for engineering gaps | [dev-manager.md](dev-manager.md) | [dev-manager.md](../.claude/agents/dev-manager.md) |
+
 ## Quality Assurance
 
 | Name | Role | Expertise | Profile | Agent |
